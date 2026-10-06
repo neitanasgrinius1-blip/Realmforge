@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Realmforge Idle RPG</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#101522;color:#fff;min-height:100vh;display:flex;justify-content:center}
+button,input{font:inherit}
+button{cursor:pointer}
+#app{width:min(1060px,100vw);min-height:100vh;background:#202938;position:relative;overflow:hidden}
+.hidden{display:none!important}
+.auth{min-height:100vh;display:grid;place-items:center;padding:22px;background:radial-gradient(circle at 50% 20%,#496486 0,#202938 48%,#101522 100%)}
+.authbox{width:min(430px,94vw);background:#263448;border:2px solid #4b5d76;border-radius:24px;padding:26px;box-shadow:0 20px 60px #0009;text-align:center}
+.logo{font-size:58px;filter:drop-shadow(0 5px 4px #0008)}
+.authbox h1{margin:4px 0;font-size:32px}.muted{color:#aebbd0}
+.authbox input{width:100%;margin:7px 0;padding:13px;border-radius:12px;border:2px solid #465a73;background:#141c29;color:#fff;outline:none}
+.primary{width:100%;padding:13px;border:0;border-radius:12px;background:linear-gradient(#4db4ff,#1976d2);color:white;font-weight:900;box-shadow:inset 0 2px #ffffff55,0 4px #0d4f91}
+.secondary{width:100%;padding:11px;border:1px solid #50627a;border-radius:11px;background:#303e52;color:#fff;margin-top:9px}
+.top{padding:10px 12px 7px;background:#344155;border-bottom:2px solid #121a27;display:grid;grid-template-columns:110px 1fr auto;gap:10px;align-items:center}
+.avatar{width:78px;height:78px;border-radius:18px;border:3px solid #101723;background:linear-gradient(#f4c36b,#c57a29);display:grid;place-items:center;font-size:45px;box-shadow:inset 0 2px #fff8,0 4px #0007}
+.resource{display:flex;gap:8px;flex-wrap:wrap}.pill{min-width:120px;padding:7px 12px;border-radius:11px;background:#182130;border:2px solid #4d6078;font-weight:900;display:flex;gap:7px;align-items:center}
+.profile{text-align:right;font-weight:800}.smallbtn{padding:7px 10px;border-radius:9px;border:1px solid #657894;background:#263348;color:#fff;margin-top:4px}
+.hero{padding:10px 18px 4px;background:linear-gradient(#52627a,#354357);border-bottom:2px solid #1a2331}
+.levelrow{display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:19px}.bar{height:19px;background:#182130;border:3px solid #101722;border-radius:99px;overflow:hidden;box-shadow:inset 0 2px #0007}.fill{height:100%;background:linear-gradient(90deg,#35b9ff,#176fd0);transition:.25s}
+.main{padding:14px;background:linear-gradient(#3f5269,#293648 62%,#253141);min-height:535px}
+.world{text-align:center;color:#d9e7f7;font-size:17px;font-weight:900;letter-spacing:.5px}
+.battle{margin:8px auto 12px;width:min(650px,94%);min-height:265px;border-radius:24px;border:3px solid #566a83;background:radial-gradient(circle at 50% 45%,#f7df92 0,#b87335 18%,#392b36 42%,#151c29 75%);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 0 45px #0009,0 8px 20px #0007}
+.battle:before{content:"";position:absolute;width:85%;height:45px;bottom:25px;border-radius:50%;background:#0008;filter:blur(8px)}
+.monster{font-size:105px;z-index:1;filter:drop-shadow(0 9px 5px #0008);animation:float 2.5s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-7px)}}
+.enemyname{z-index:2;font-size:22px;font-weight:1000;text-shadow:0 2px #000}
+.enemybar{width:58%;height:13px;background:#171b25;border:2px solid #080c13;border-radius:99px;overflow:hidden;z-index:2}.enemyfill{height:100%;background:linear-gradient(90deg,#ff5b55,#b51e2b)}
+.equiparea{width:min(700px,100%);margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.panel{background:#273446;border:2px solid #53667f;border-radius:15px;padding:10px;box-shadow:0 5px 14px #0005}
+.panel h3{margin:0 0 7px;font-size:16px}.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.slot{aspect-ratio:1;background:#d5d9d2;border:3px solid #0d1420;border-radius:12px;display:grid;place-items:center;font-size:35px;position:relative;box-shadow:inset 0 2px #fff8}
+.slot.empty{background:#313d4f;color:#111c2c;font-size:24px}.slot .lv{position:absolute;bottom:1px;right:4px;font-size:12px;font-weight:1000;color:#111;text-shadow:0 1px #fff}
+.controls{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:9px;margin:12px auto;width:min(760px,100%)}
+.control{border:2px solid #0e1825;border-radius:14px;padding:13px 8px;font-weight:1000;color:#fff;background:linear-gradient(#3faaf3,#176bc0);box-shadow:inset 0 2px #fff5,0 4px #102c4e}
+.control.gold{background:linear-gradient(#ffc44f,#d88b16);color:#241500}.control.gray{background:linear-gradient(#69788d,#46556a)}
+.bottom{display:grid;grid-template-columns:repeat(5,1fr);background:#303a4b;border-top:3px solid #141c29;padding:8px 7px;gap:7px}
+.nav{min-height:65px;border:0;border-radius:13px;background:#202a39;color:#dce8f7;font-size:27px}.nav span{display:block;font-size:11px;font-weight:800;margin-top:2px}.nav.active{background:#3e536d;box-shadow:inset 0 0 0 2px #5ebcff}
+
+body.light #app{background:#e8eef6;color:#172033}
+body.light .main{background:linear-gradient(#dce8f4,#c5d3e2)}
+body.light .top{background:#d0dbea}
+body.light .hero{background:linear-gradient(#b8c8db,#9eafc3)}
+body.light .panel,body.light .modalbox{background:#e8eef6;color:#172033}
+body.light .listitem{background:#d9e3ef}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#111a28ee;border:1px solid #68809e;padding:10px 15px;border-radius:12px;font-weight:800;z-index:20}
+.closex{position:sticky;top:0;float:right;width:38px;height:38px;border:1px solid #667a96;border-radius:50%;background:#162235;color:#fff;font-size:20px;font-weight:900;cursor:pointer;z-index:2}.closex:hover{transform:scale(1.05)}.slot.clickable{cursor:pointer;transition:.12s}.slot.clickable:hover{transform:translateY(-2px);filter:brightness(1.12)}.modal{position:fixed;inset:0;background:#07101acc;display:grid;place-items:center;padding:20px;z-index:30}.modalbox{width:min(600px,95vw);max-height:82vh;overflow:auto;background:#263448;border:2px solid #536984;border-radius:18px;padding:18px}
+.listitem{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px;margin:7px 0;border:1px solid #52657d;border-radius:10px;background:#1c2635}
+@media(max-width:650px){.top{grid-template-columns:78px 1fr}.profile{display:none}.resource{gap:5px}.pill{min-width:95px;font-size:13px;padding:6px}.battle{min-height:235px}.monster{font-size:85px}.equiparea{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1.3fr 1fr}.slot{font-size:29px}}
+</style>
+
+<meta name="theme-color" content="#101827">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Realmforge">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+</head>
+<body>
+<div id="app">
+<section id="auth" class="auth">
+ <div class="authbox">
+  <div class="logo">⚔️</div><h1>Realmforge</h1><p class="muted">Create a hero and enter the idle realm.</p>
+  <input id="username" maxlength="18" placeholder="Hero name">
+  <input id="pin" maxlength="20" type="password" placeholder="Password / PIN">
+  <button id="create" class="primary">Create Account</button>
+  <button id="login" class="secondary">Log In</button>
+  <p class="muted" style="font-size:12px">Accounts are stored only in this browser on this device.</p>
+ </div>
+</section>
+
+<section id="game" class="hidden">
+<header class="top">
+ <button class="avatar" id="avatar" aria-label="Open profile and settings">🧙</button>
+ <div class="resource">
+  <div class="pill">🪙 <span id="gold">0</span></div>
+  <div class="pill">💎 <span id="gems">25</span></div>
+  <div class="pill">⚡ <span id="energy">100</span></div>
+ </div>
+ <div class="profile"><div id="playerName">Hero</div><button class="smallbtn" id="logout">Logout</button></div>
+</header>
+<section class="hero">
+ <div class="levelrow"><span>LV <span id="level">1</span></span><span id="xptext">0/20 XP</span></div>
+ <div class="bar"><div id="xpbar" class="fill"></div></div>
+</section>
+<main class="main">
+ <div class="world">🏰 SECTOR <span id="sector">1-1</span> · <span id="wave">WAVE 1</span></div>
+ <div class="battle">
+  <div class="monster" id="monster">🟢</div>
+  <div class="enemyname" id="enemyname">Slime</div>
+  <div class="enemybar"><div class="enemyfill" id="enemybar"></div></div>
+  <div class="muted" id="enemyhp" style="z-index:2;margin-top:4px">10/10 HP</div>
+ </div>
+ <div class="equiparea">
+  <div class="panel"><h3>⚔️ Equipment</h3><div class="slots" id="slots"></div></div>
+  <div class="panel"><h3>📦 Backpack</h3><div class="slots" id="backpack"></div></div>
+ </div>
+ <div class="controls">
+  <button class="control gray" id="upgrade">⬆️ Upgrade<br>Level <span id="upg">1</span></button>
+  <button class="control gold" id="request">🎁 Wave Bonus<br><span id="reward">10</span> 🪙</button>
+  <button class="control" id="auto">⟳ Auto: ON</button>
+ </div>
+</main>
+<nav class="bottom">
+ <button class="nav active" data-tab="home">🏠<span>Home</span></button>
+ <button class="nav" data-tab="hero">🧙<span>Hero</span></button>
+ <button class="nav" data-tab="gear">🎒<span>Gear</span></button>
+ <button class="nav" data-tab="skills">✨<span>Skills</span></button>
+ <button class="nav" data-tab="shop">🏪<span>Shop</span></button>
+</nav>
+</section>
+<div id="modal" class="modal hidden"><div class="modalbox"><button id="closeModal" class="closex" aria-label="Close">✕</button><div id="modalContent"></div></div></div>
+<div id="toast" class="toast hidden"></div>
+</div>
+
+<script>
+const KEY="realmforgeAccountsV1",SESSION="realmforgeSession";
+const monsters=[
+ {name:"Forest Slime",icon:"🟢",hp:12,atk:2,gold:5,xp:8},
+ {name:"Cave Wolf",icon:"🐺",hp:20,atk:3,gold:8,xp:12},
+ {name:"Bone Guard",icon:"💀",hp:31,atk:5,gold:12,xp:17},
+ {name:"Crystal Spider",icon:"🕷️",hp:45,atk:7,gold:17,xp:24},
+ {name:"Orc Brute",icon:"👹",hp:62,atk:9,gold:23,xp:31},
+ {name:"Shadow Mage",icon:"🧙",hp:80,atk:12,gold:31,xp:40},
+ {name:"Ancient Dragon",icon:"🐉",hp:125,atk:18,gold:55,xp:70}
+];
+const gearTypes=["🗡️","🛡️","💍","👢","🪖","📿","🏹","🔮"];
+const rarities=[["Common",1],["Rare",2],["Epic",4],["Legendary",7]];
+let accounts=JSON.parse(localStorage.getItem(KEY)||"{}"), user=null, state=null, timer=null, auto=true;
+
+const $=id=>document.getElementById(id);
+function saveAccounts(){localStorage.setItem(KEY,JSON.stringify(accounts))}
+function toast(t){$("toast").textContent=t;$("toast").classList.remove("hidden");setTimeout(()=>$("toast").classList.add("hidden"),1700)}
+function fresh(name){return {name,avatar:"🧙",friends:[],redeemed:{},sound:true,light:false,level:1,xp:0,gold:50,gems:25,energy:100,baseAtk:5,baseHp:35,hp:35,kills:0,sector:1,wave:1,upgrade:1,gear:[null,null,null,null],bag:[],enemyHp:12,auto:true,rewardWave:0,skills:{strike:1,heal:0,meteor:0},cool:{strike:0,heal:0,meteor:0}}}
+function stats(){state.rewardWave=state.rewardWave||0;let atk=state.baseAtk,hp=state.baseHp;state.gear.forEach(g=>{if(g){atk+=g.atk;hp+=g.hp}});return{atk,hp}}
+function monster(){let i=Math.min(5,Math.floor((state.wave-1)/3));if(state.wave%10===0)return monsters[6];return monsters[i]}
+function enemyMax(){let m=monster();return Math.round(m.hp*(1+(state.wave-1)*.08))}
+function xpNeed(){return 20+(state.level-1)*16}
+function gearDrop(){
+ let r=Math.random(),rar=r<.58?0:r<.84?1:r<.96?2:3, p=rarities[rar][1],type=Math.floor(Math.random()*gearTypes.length);
+ return {icon:gearTypes[type],rarity:rarities[rar][0],atk:p+Math.floor(Math.random()*3),hp:(p*3)+Math.floor(Math.random()*6),lv:state.level}
+}
+function better(g){if(!g)return true;let score=x=>x.atk*4+x.hp/4;return score(g)>score(state.gear[0]||{atk:0,hp:0})}
+function render(){
+ const st=stats(),m=monster();state.hp=Math.min(state.hp,st.hp);
+ $("playerName").textContent=state.name;$("avatar").textContent=state.avatar||"🧙";$("gold").textContent=state.gold;$("gems").textContent=state.gems;$("energy").textContent=state.energy;
+ $("level").textContent=state.level;$("xptext").textContent=`${state.xp}/${xpNeed()} XP`;$("xpbar").style.width=Math.min(100,state.xp/xpNeed()*100)+"%";
+ $("sector").textContent=`${state.sector}-${Math.ceil(state.wave/5)}`;$("wave").textContent=`WAVE ${state.wave}`;
+ $("monster").textContent=m.icon;$("enemyname").textContent=(state.wave%10===0?"👑 BOSS · ":"")+m.name;
+ $("enemyhp").textContent=`${Math.max(0,state.enemyHp)}/${enemyMax()} HP`;$("enemybar").style.width=Math.max(0,state.enemyHp/enemyMax()*100)+"%";
+ $("upg").textContent=state.upgrade;
+ $("reward").textContent=10+state.level*3;
+ $("request").disabled=state.rewardWave===state.wave;
+ $("request").innerHTML=state.rewardWave===state.wave
+   ?"✅ Bonus Claimed"
+   :`🎁 Wave Bonus<br><span id="reward">${10+state.level*3}</span> 🪙`;
+ $("auto").textContent=`⟳ Auto: ${auto?"ON":"OFF"}`;
+ $("slots").innerHTML=state.gear.map((g,i)=>g?`<div class="slot" title="${g.rarity} +${g.atk} ATK +${g.hp} HP">${g.icon}<span class="lv">+${g.atk}</span></div>`:`<div class="slot empty">◇</div>`).join("");
+ $("backpack").innerHTML=state.bag.slice(0,8).map((g,i)=>`<div class="slot clickable" title="${g.rarity} +${g.atk} ATK +${g.hp} HP — click to equip" onclick="equipBag(${i})">${g.icon}<span class="lv">+${g.atk}</span></div>`).join("")||`<div class="slot empty">∅</div>`;
+ accounts[state.name].data=state;saveAccounts();
+}
+function levelCheck(){
+ while(state.xp>=xpNeed()){state.xp-=xpNeed();state.level++;state.baseAtk+=2;state.baseHp+=8;state.hp=stats().hp;toast("🎉 Level Up!");}
+}
+function attack(){
+ if(!auto)return;
+ let st=stats();state.enemyHp-=st.atk;
+ if(state.enemyHp<=0){
+  let m=monster(),boss=state.wave%10===0;
+  const waveGold=m.gold+(boss?25:0);
+  state.gold+=waveGold;
+  state.xp+=m.xp;
+  state.kills++;
+  toast(`🏆 Wave complete! +${waveGold} 🪙`);
+  if(Math.random()<.38){let g=gearDrop();state.bag.unshift(g);toast(`🎁 ${g.rarity} gear found!`);if(better(g)){state.gear[0]=g;state.bag=state.bag.filter(x=>x!==g)}}
+  levelCheck();state.wave++;if(state.wave%10===0)toast("👑 BOSS WAVE!");
+  state.enemyHp=enemyMax();
+ }else{
+  state.hp-=mAtk();
+  if(state.hp<=0){state.hp=st.hp;toast("💤 Your hero recovered!")}
+ }
+ render();
+}
+function mAtk(){return Math.max(1,monster().atk)}
+function upgrade(){let c=20+state.upgrade*15;if(state.gold>=c){state.gold-=c;state.upgrade++;state.baseAtk++;state.baseHp+=3;state.hp=stats().hp;toast("⬆️ Hero upgraded!");render()}else toast("Not enough gold!")}
+$("create").onclick=()=>{let n=$("username").value.trim(),pin=$("pin").value;if(n.length<3||pin.length<3)return toast("Use at least 3 characters.");if(accounts[n])return toast("That hero already exists.");accounts[n]={pin,data:fresh(n)};saveAccounts();loginUser(n,pin)}
+$("login").onclick=()=>{let n=$("username").value.trim(),pin=$("pin").value;if(!accounts[n]||accounts[n].pin!==pin)return toast("Account not found or password is wrong.");loginUser(n,pin)}
+function loginUser(n,p){state=accounts[n].data;user=n;auto=state.auto!==false;$("auth").classList.add("hidden");$("game").classList.remove("hidden");render();if(timer)clearInterval(timer);timer=setInterval(attack,1100)}
+$("logout").onclick=()=>{if(state){state.auto=auto;accounts[user].data=state;saveAccounts()}if(timer)clearInterval(timer);state=null;user=null;$("game").classList.add("hidden");$("auth").classList.remove("hidden")}
+$("upgrade").onclick=upgrade;
+$("request").onclick=()=>{
+ if(state.rewardWave===state.wave){toast("Already claimed this wave!");return}
+ let r=10+state.level*3;
+ state.gold+=r;
+ state.rewardWave=state.wave;
+ toast(`✨ +${r} gold`);
+ render();
+}
+$("auto").onclick=()=>{auto=!auto;state.auto=auto;render()}
+$("closeModal").onclick=()=>$("modal").classList.add("hidden");
+$("modal").onclick=e=>{if(e.target===$("modal"))$("modal").classList.add("hidden")};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")$("modal").classList.add("hidden")});
+$("avatar").onclick=()=>openProfile();
+function openProfile(){
+ $("modalContent").innerHTML=`
+ <h1>👤 ${state.name}</h1>
+ <p class="muted">Level ${state.level} hero</p>
+ <div class="listitem"><span>🧙 Change Avatar</span><button class="smallbtn" onclick="changeAvatar()">Change</button></div>
+ <div class="listitem"><span>⚙️ Settings</span><button class="smallbtn" onclick="openSettings()">Open</button></div>
+ <div class="listitem"><span>👥 Friends</span><button class="smallbtn" onclick="openFriends()">Open</button></div>
+ <div class="listitem"><span>🎟️ Promo Codes</span><button class="smallbtn" onclick="openPromo()">Enter</button></div>
+ <div class="listitem"><span>💾 Save</span><button class="smallbtn" onclick="render();toast('Saved!')">Save</button></div>`;
+ $("modal").classList.remove("hidden");
+}
+function changeAvatar(){
+ const icons=["🧙","🧝","🧛","🧚","🧑‍🚀","🧑‍🎨","🤖","🐱","🦊","🐼"];
+ let i=icons.indexOf($("avatar").textContent.trim()); i=(i+1)%icons.length;
+ $("avatar").textContent=icons[i]; state.avatar=icons[i]; render();
+}
+function openSettings(){
+ $("modalContent").innerHTML=`
+ <h1>⚙️ Settings</h1>
+ <div class="listitem"><span>⚔️ Auto Battle</span><button class="smallbtn" onclick="auto=!auto;state.auto=auto;render();openSettings()">${auto?"ON":"OFF"}</button></div>
+ <div class="listitem"><span>🔊 Sound Effects</span><button class="smallbtn" onclick="state.sound=state.sound===false;render();openSettings()">${state.sound===false?"OFF":"ON"}</button></div>
+ <div class="listitem"><span>🌙 Dark Theme</span><button class="smallbtn" onclick="toggleTheme()">Toggle</button></div>
+ <div class="listitem"><span>🗑️ Reset Character</span><button class="smallbtn" onclick="resetCharacter()">Reset</button></div>`;
+}
+function toggleTheme(){
+ document.body.classList.toggle("light");
+ const on=document.body.classList.contains("light");
+ state.light=on;render();openSettings();
+}
+function resetCharacter(){
+ if(confirm("Reset this hero's progress?")){
+   state=fresh(state.name); state.avatar="🧙"; auto=true; accounts[user].data=state; saveAccounts(); render(); openProfile(); toast("Character reset");
+ }
+}
+function openPromo(){
+ $("modalContent").innerHTML=`
+ <h1>🎟️ Promo Codes</h1>
+ <p class="muted">Enter a code to receive a one-time reward.</p>
+ <input id="promoInput" maxlength="24" placeholder="Enter promo code" style="width:100%;padding:12px;border-radius:10px;border:1px solid #50627a;background:#151e2b;color:white">
+ <button class="primary" style="margin-top:9px" onclick="redeemPromo()">Redeem Code</button>
+ <p class="muted" style="font-size:12px">Try: <b>WELCOME</b></p>`;
+}
+function redeemPromo(){
+ const code=($("promoInput").value||"").trim().toUpperCase();
+ const rewards={WELCOME:{gold:250,gems:10},HERO:{gold:500,gems:5},REALM:{gold:1000,gems:20}};
+ state.redeemed=state.redeemed||{};
+ if(!rewards[code]) return toast("Invalid promo code");
+ if(state.redeemed[code]) return toast("Code already used");
+ const r=rewards[code];state.gold+=r.gold;state.gems+=r.gems;state.redeemed[code]=true;
+ render();toast(`🎁 +${r.gold} gold +${r.gems} gems`);openPromo();
+}
+function openFriends(){
+ state.friends=state.friends||[];
+ $("modalContent").innerHTML=`
+ <h1>👥 Friends</h1>
+ <p class="muted">Local friends for this offline prototype.</p>
+ <input id="friendInput" maxlength="18" placeholder="Friend's hero name" style="width:100%;padding:12px;border-radius:10px;border:1px solid #50627a;background:#151e2b;color:white">
+ <button class="primary" style="margin-top:9px" onclick="addFriend()">Add Friend</button>
+ <div style="margin-top:12px">${state.friends.length?state.friends.map((f,i)=>`<div class="listitem"><span>🟢 ${f}</span><button class="smallbtn" onclick="removeFriend(${i})">Remove</button></div>`):"<p class='muted'>No friends yet.</p>"}</div>
+ <p class="muted" style="font-size:12px">For real cross-device friends, this game will need an online account/server system.</p>`;
+}
+function addFriend(){
+ const n=($("friendInput").value||"").trim();
+ if(n.length<3)return toast("Enter a valid hero name");
+ if(n===state.name)return toast("You can't add yourself");
+ state.friends=state.friends||[];
+ if(state.friends.includes(n))return toast("Already added");
+ state.friends.push(n);render();openFriends();
+}
+function removeFriend(i){state.friends.splice(i,1);render();openFriends()}
+document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>{
+ document.querySelectorAll(".nav").forEach(x=>x.classList.remove("active"));b.classList.add("active");
+ let tab=b.dataset.tab;
+ if(tab==="home"){toast("🏰 Home")}
+ else openTab(tab);
+});
+function openTab(tab){
+ let title="",body="";
+ if(tab==="hero")title="🧙 Hero",body=`<h2>${state.name}</h2><p>Level ${state.level}</p><p>⚔️ Attack: ${stats().atk}</p><p>❤️ HP: ${stats().hp}</p><p>👹 Defeated: ${state.kills}</p>`;
+ if(tab==="gear")title="🎒 Equipment",body=`<h2>Your Gear</h2><div class="listitem">⚔️ Attack bonus <b>+${stats().atk-state.baseAtk}</b></div><div class="listitem">❤️ HP bonus <b>+${stats().hp-state.baseHp}</b></div>${state.bag.map((g,i)=>`<div class="listitem"><span>${g.icon} ${g.rarity} · +${g.atk} ATK · +${g.hp} HP</span><button class="smallbtn" onclick="equipBag(${i})">Equip</button></div>`).join("")||"<p class='muted'>Backpack empty.</p>"}`;
+ if(tab==="skills")title="✨ Skills",body=`<h2>Abilities</h2><div class="listitem">💥 Power Strike <b>Lv ${state.skills.strike}</b></div><div class="listitem">💚 Healing Wave <b>${state.level>=3?"Unlocked":"Unlocks Lv 3"}</b></div><div class="listitem">☄️ Meteor <b>${state.level>=7?"Unlocked":"Unlocks Lv 7"}</b></div>`;
+ if(tab==="shop")title="🏪 Shop",body=`<h2>Realm Shop</h2><div class="listitem">💎 10 Gems <button class="smallbtn" onclick="buyGems()">Buy for 100 🪙</button></div><div class="listitem">⚡ Energy Refill <button class="smallbtn" onclick="refill()">Refill</button></div>`;
+ $("modalContent").innerHTML=`<h1>${title}</h1>${body}`;$("modal").classList.remove("hidden");
+}
+window.equipBag=i=>{
+  let g=state.bag[i];
+  if(!g)return;
+  let old=state.gear[0];
+  state.gear[0]=g;
+  state.bag.splice(i,1);
+  if(old)state.bag.unshift(old);
+  toast(`✅ ${g.rarity} gear equipped!`);
+  render();
+  openTab("gear");
+}
+window.buyGems=()=>{if(state.gold>=100){state.gold-=100;state.gems+=10;render();openTab("shop")}}
+window.refill=()=>{if(state.gems>=5){state.gems-=5;state.energy=100;render();openTab("shop")}}
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>
